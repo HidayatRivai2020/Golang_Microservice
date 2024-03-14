@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "Broker_Service/front-end"
+		},
+		{
+			"path": "Broker_Service/broker-service"
+		},
+		{
+			"path": "Broker_Service/project"
+		}
+	]
+}
