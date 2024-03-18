@@ -1,18 +1,22 @@
 # Broker Service with Golang Microservice
+- Requrement
 - How to
 	- Add folder into workspaces
 	- building docker image for the Service
 		- Multi-stage build using certified go docker image
+	- Create MakeFile
 	- Create routing
 	- Define And Start Server
 - Front End Service
 - Broker Service
+	- Update broker for a Standard JSON format (After Creating Authentication service)
 - Create helper functions to deal with json
 	- Read json
 	- Write json
 	- Error json
 - Create Make File
 - Authentication service
+	- Update front-end to Implement Auth Services
 
 ## Requirement
 - go get github.com/go-chi/chi/v5
@@ -72,6 +76,13 @@
 	- use `javascript` and `DOM`
 	- add a `constant variable` with the `method`
 	- `fetch` the `url` with the `method` and implement algorithm using `DOM`
+8. Create MakeFile	
+
+### Create Make File
+1. Create `MakeFile` in `<project>` folder
+2. Implement logic to build up or teardown docker
+3. Remove the duplicate docker build up
+4. Run make using `make <command>`
 	
 ### Create routing
 1. in `<api>` folder, create a new file called routes.go
@@ -227,12 +238,6 @@
 4. set the `<payload>` jsonResponse
 9. return the jsonResponse using `<app>.writeJSON`
 
-## Create Make File
-1. Create `MakeFile` in `<project>` folder
-2. Implement logic to build up or teardown docker
-3. Remove the duplicate docker build up
-4. Run make using `make <command>`
-
 ## Authentication Service
 1. Create `<authentication>` folder and add it into workspace
 2. Init the service : `go mod init authentication`
@@ -267,7 +272,7 @@
 18. Update `<routes.go>`
 19. Create `<handlers.go>` to read JSON, get user by email, and check if the password matches
 
-### Update front-end
+### Update front-end to Implement Auth Services
 1. Add button and implementation
 	- add button using html
 	- use `javascript` and `DOM`
