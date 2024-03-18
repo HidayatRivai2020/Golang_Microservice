@@ -273,5 +273,5 @@
 	- use `javascript` and `DOM`
 	- add a `constant variable` with the `method`
 	- `fetch` the `url` with the `method` and implement algorithm using `DOM`
-2. make docker with `make up --build -d`
+2. make docker with `make up_build`
 3. Make front End with `make start`
