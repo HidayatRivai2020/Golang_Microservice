@@ -7,14 +7,13 @@
 	- Create MakeFile
 	- Create routing
 	- Define And Start Server
+	- Create helper functions to deal with json
+		- Read json
+		- Write json
+		- Error json
 - Front End Service
 - Broker Service
 	- Update broker for a Standard JSON format (After Creating Authentication service)
-- Create helper functions to deal with json
-	- Read json
-	- Write json
-	- Error json
-- Create Make File
 - Authentication service
 	- Update front-end to Implement Auth Services
 
@@ -23,7 +22,8 @@
 - go get github.com/go-chi/chi/cors
 - go get github.com/jackc/pgconn
 - go get github.com/jackc/pgx/v4
-- go get github.com/jackc/pgx/v4/stdlib`
+- go get github.com/jackc/pgx/v4/stdlib
+- go get go.mongodb.org/mongo-driver/mongo
 
 ## How to
 
@@ -115,6 +115,52 @@
 7. start the server using  `<srv>.ListenAndServe>`
 8. add error handling
 9.in `http server`, add `Addr` with `String` and `Handler` with `app.Routes()`
+
+	
+### Create helper functions to deal with json
+1. In `<cmd/api>` folder create `<helpers.go>`
+2. Move `<jsonResponse> struct` from `<handler.go>` into `<helper.go>`
+3. Remove all Json logic from another service and use `<helpers.go>` instead
+
+#### Read Json
+1. Create `receiver function (<app *Config>)` to read json (i.e : `<readJSON>`)
+2. Add some parameter :
+	- `<w>` as `http.ResponseWriter`
+	- `<r>` as `http.Request`
+	- `<data>` as `any`
+3. Add limitation of Json File size using `http.MaxBytesReader`
+4. Add `json.NewDecoder`
+5. Decode the data using `<decoder>.Decode`
+6. Add error handling using return `<error>`
+7. `Decode` the `&struct{}{}`
+8. Add error handling return `<error>.New`
+9. return `nil`
+
+#### Write Json
+1. Create `receiver function (<app *Config>)` to write json (i.e : `<writeJSON>`)
+2. Add some parameter :
+	- `<w>` as `http.ResponseWriter`
+	- `<status>` as `int`
+	- `<data>` as `any`
+	- `<headers>` as `...httpHeader`
+3. Use `json.Marshal` to return json encoding
+4. Add error handling using return `<error>`
+5. Get the value of all `headers`
+6. Set the header using `Header.set`
+7. write header using `WriteHeader`
+8. Add error handling using return `<error>`
+9. return `nil`
+
+#### Error json
+1. Create `receiver function (<app *Config>)` to return error json (i.e : `<errorJSON>`)
+2. Add some parameter :
+	- `<w>` as `http.ResponseWriter`
+	- `<err>` as `error`
+	- `<status>` as `...any`
+3. set statusCode with default value `http.StatusBadRequest`
+4. set the `<payload>` jsonResponse
+9. return the jsonResponse using `<app>.writeJSON`
+
 	
 ## Front End Service
 1. Add `<front-end>`folder into workspace
@@ -193,50 +239,6 @@
 	- read response body and store it in variable
 	- decode the json from auth service
 	- write JSON response
-	
-## Create helper functions to deal with json
-1. In `<cmd/api>` folder create `<helpers.go>`
-2. Move `<jsonResponse> struct` from `<handler.go>` into `<helper.go>`
-3. Remove all Json logic from another service and use `<helpers.go>` instead
-
-### Read Json
-1. Create `receiver function (<app *Config>)` to read json (i.e : `<readJSON>`)
-2. Add some parameter :
-	- `<w>` as `http.ResponseWriter`
-	- `<r>` as `http.Request`
-	- `<data>` as `any`
-3. Add limitation of Json File size using `http.MaxBytesReader`
-4. Add `json.NewDecoder`
-5. Decode the data using `<decoder>.Decode`
-6. Add error handling using return `<error>`
-7. `Decode` the `&struct{}{}`
-8. Add error handling return `<error>.New`
-9. return `nil`
-
-### Write Json
-1. Create `receiver function (<app *Config>)` to write json (i.e : `<writeJSON>`)
-2. Add some parameter :
-	- `<w>` as `http.ResponseWriter`
-	- `<status>` as `int`
-	- `<data>` as `any`
-	- `<headers>` as `...httpHeader`
-3. Use `json.Marshal` to return json encoding
-4. Add error handling using return `<error>`
-5. Get the value of all `headers`
-6. Set the header using `Header.set`
-7. write header using `WriteHeader`
-8. Add error handling using return `<error>`
-9. return `nil`
-
-### Error json
-1. Create `receiver function (<app *Config>)` to return error json (i.e : `<errorJSON>`)
-2. Add some parameter :
-	- `<w>` as `http.ResponseWriter`
-	- `<err>` as `error`
-	- `<status>` as `...any`
-3. set statusCode with default value `http.StatusBadRequest`
-4. set the `<payload>` jsonResponse
-9. return the jsonResponse using `<app>.writeJSON`
 
 ## Authentication Service
 1. Create `<authentication>` folder and add it into workspace
@@ -280,3 +282,58 @@
 	- `fetch` the `url` with the `method` and implement algorithm using `DOM`
 2. make docker with `make up_build`
 3. Make front End with `make start`
+
+
+## Logger Service
+1. Create `<logger>` folder and add it into workspace
+2. Init the service : `go mod init log-service`
+3. Create folder `<cmd/api>` in `<logger>` folder
+4. Create `main.go` with package `main` and function `main`
+5. Create mongo Constant
+6. create mongo `Client`
+7. Create Config
+8. Connect to mongo
+9. Create `<connectToMongo>` function
+	- Create connection options using `ApplyURI`
+	- Set Authenticationus using `SetAuth`
+10. Connect to mongo using `Connect`
+11. In `Main.go`, use `context.WithTimeOut` to disconnect
+12. Close connection using `Disconnect`
+13. Create `data` folder and add `models.go`
+14. Add properties `Mongo` and `Models` in `<Config>`
+15. Create routing 
+16. Create `handlers.go`
+	- WriteLog : to write the logger
+17. Create `helpers.go` 
+18. Define and start server
+19. Add `mongo` image into `docker-compose.yml`
+20. Add `logger` service into `docker-compose.yml`
+21. Update Make File
+22. Update Broker Service to use Logger
+	- update `<RequestPayload>` and `<LogPayload>`
+	- add new action "log"
+	- add function `<logItem>`
+	- create new POST requested
+	- set header
+	- get client response
+	- add error handling
+	- return payload
+23. Update the front end to post the logger via broker
+	- add button
+	- add javarscript implementation using DOM`
+	- add click event listener to the button
+	- add payload
+	- add headers
+	- add body
+	- fetch the data
+24. Update the authentication to use basic logging
+	- create new function `<logRequest>` in `<handlers.go>`
+	- create new `struct <entry>`
+	- create `new request`
+	- add error handling
+	- add `client request`
+	- add error handling
+	- `return nil`
+	- call `<logRequest>` in `main.go`
+	
+

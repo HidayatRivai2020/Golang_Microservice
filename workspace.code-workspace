@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "Broker_Service/project"
+		},
+		{
+			"path": "Broker_Service/logger-service"
 		}
 	]
 }
