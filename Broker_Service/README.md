@@ -1,5 +1,5 @@
 # Broker Service with Golang Microservice
-- Requrement
+- Requirement
 - How to
 	- Add folder into workspaces
 	- building docker image for the Service
@@ -24,6 +24,9 @@
 - go get github.com/jackc/pgx/v4
 - go get github.com/jackc/pgx/v4/stdlib
 - go get go.mongodb.org/mongo-driver/mongo
+- go get github.com/vanng822/go-premailer/premailer
+- go get github.com/xhit/go-simple-mail/v2
+- go get github.com/rabbitmq/amqp091-go
 
 ## How to
 
@@ -336,4 +339,115 @@
 	- `return nil`
 	- call `<logRequest>` in `main.go`
 	
+## Mail Service
+1. Add `mail` image into `docker-compose.yml`
+2. Create `<mail-service>` folder and add it into workspace
+3. Init the service : `go mod init log-service`
+4. Create folder `<cmd/api>` in `<mail-service>` folder
+5. Create `main.go` with package `main` and function `main`
+5. Create `helpers.go`
+6. Create `Routes.go`
+7. Define and start server
+8. Create `mailer`
+9. Create `template`
+10. Add `<mail-service>` into `<docker-compose.yml>` and 
+11. Update Broker service to handle `mail`
+	- add `mail` payload
+	- add `mail` submission
+	- Create `<sendMail>` function 
+		- call mail Service
+		- post to mail Service
+		- set the header
+		- `Do` the requested
+		- get the `statusCode`
+		- send back response
 
+### Mailer
+1. Create `<mailer.go>`
+2. Create `<mail>` struct
+3. Create `<Message>` struct
+4. create `<SendSMTPMessage>` function
+5. Create `<buildHTMLMessage>` function
+6. Create `<inlineCss>` function
+7. Create `<buildPlainTextMessage>`
+8. Create new email with `NewMsg` function
+9. Set the value for the email
+10. Send the email using `Send`
+
+### Template
+1. Create `<templates>` folder
+2. Create `<mail.html.gohtml>`
+3. Create `<mail.plain.gohtml>`
+4. Update `<routes.go>`
+5. Create `<Handler>`
+	- Create `<SendMail>` function
+	- Create `<CreteMail>` function
+	
+## listener
+1. Create `<listener-service>` folder and add it into workspace
+2. Init the service : `go mod init listener-service`
+3. Create folder `<cmd/api>` in `<listener-service>` folder
+4. Create `main.go` with package `main` and function `main`
+5. Add `rabbitmq` into `<docker-compose.yml>`
+5. Connect to `rabbitmq`
+	- Create `connect` function
+	- use `Dial` to connect with `rabbitmq` inside loop
+	- create `error handling`
+	- return `connection` if no problem
+	- `defer close` the connection
+6. Create `<event> package`
+7. Create `<Consumer.go>
+	- create struct `<Consumer>`
+	- create `<NewConsumer>` function
+	- get the setup
+	- create `<Setup>` function
+		- get the channel
+		- return `DeclareExchange`
+	- create `payload` struct
+	- create `Listen` function
+		- get the channel
+		- defer close channel
+		- get the `<DeclareRandomQueue>`
+		- Bind the `topic queue`
+		- add `error handling`
+		- Consume from channel
+		- create goroutine to handle payload
+	- create `<handlePayload>`
+	- create `<logEvent>`
+8. Create `<Event.go>
+	- create `<DeclareExchange>` function
+		- return `ExhangeDeclare` 
+	- create `<DeclareRandomQueue>` function
+		- return `<QueueDeclare>` 
+9. Start listening for messages
+10. Create Consumer
+11. Watch the queue and consume events
+12. Create `rabbitmq` docker image and update the `makefile`
+13. Update `Broker service` to interact with `rabbitmq`
+14. Writing logic to emit events to `rabbitmq` in broker-service
+	- Create `<emitter.go>`
+	- Create `<setup>` function
+		- Create `channel`
+		- Defer `Close` channel
+		- return `<DeclareExchange>`
+	- Create `<push>` function
+		- create channel
+		- Defer `Close` channel
+		- Publish channel
+	- Create `NewEventEmitter`
+		- create emitter `setup`
+		- return emitter
+15. Adding log in the broker-service via `rabbitmq`
+	- update `<handler.go>`
+	- add `<logEventViaRabbit>` function
+		- add `pushToQueue`
+		- add error handling
+		- return `response`
+	- add `<pushToQueue>` function
+		- create `NewEventEmitter`
+		- set `log payload`
+		- return json
+		- push emitter
+	- Change action to use `<logEventViaRabbit>`
+		
+	
