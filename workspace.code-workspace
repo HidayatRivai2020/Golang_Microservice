@@ -11,6 +11,15 @@
 		},
 		{
 			"path": "Broker_Service/logger-service"
+		},
+		{
+			"path": "Broker_Service/mail-service"
+		},
+		{
+			"path": "Broker_Service/listener-service"
+		},
+		{
+			"path": "Broker_Service/authentication-service"
 		}
 	]
 }

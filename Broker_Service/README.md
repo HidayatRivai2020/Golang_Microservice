@@ -27,6 +27,10 @@
 - go get github.com/vanng822/go-premailer/premailer
 - go get github.com/xhit/go-simple-mail/v2
 - go get github.com/rabbitmq/amqp091-go
+- go get google.golang.org/grpc
+- go get google.golang.org/protobuf
+- go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27
+- go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 
 ## How to
 
@@ -450,4 +454,60 @@
 		- push emitter
 	- Change action to use `<logEventViaRabbit>`
 		
+## Add RPC
+- In `cmd/api` add `rpc.go`
+- Create `RPC struct`
+- Create `RPC payload`
+- Create `logInfo` function
+- Create log into `mongodb`
+- In `main.go` create `rpcListen` function
+	- Use function `listen`
+	- defer close listen
+	- `accept` the listener
+	- `serve connection`
+	- reguster the RPC server
+- Call RPC from broker
+	- Create `logItemViaRPC` function in `handlers.go`
+	- dial rpc
+	- call rpc
+	- return response
 	
+## grpc in logger service
+- Define a protocol
+	- create a folder
+	- create a `.proto` file
+	- create `log`, `logResponse`, and `logRequest`
+- Install protoc in cmd
+- in `<logs>` folder set up the protoc
+	- `protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative logs.proto`
+- in `cmd/api` create grpc.go
+	- create `<LogServer>` struct
+	- create `<WriteLog>` Function
+	- use `GetLogEntry`
+	- write the log
+	- insert
+	- add error handling
+	- return LogResponse
+- Create GRPC listener
+	- Create `gRpcListen` function
+	- use `netListen`
+	- add error handling
+	- use `RegisterLogServiceServer` function
+	- use `serve`
+	- add error handling
+- Create the Client Code
+	- in `broker-service` create `logs` folder
+	- create `logs.proto`
+	- `protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative logs.proto` in logs folder
+	- in `handlers.go` create `LogViaGRPC` function
+	- use `readJSON`
+	- add error handling
+	- grpc `Dial`
+	- `defer close` connection
+	- Use `NewLogServiceClient(conn)`
+	- `defer cancel` when timeout
+	- write log
+	- add error handling
+	- use `writeJson`
+	- add `routes`
+- Update The Front End
